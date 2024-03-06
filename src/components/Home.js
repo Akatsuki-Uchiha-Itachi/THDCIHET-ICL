@@ -41,7 +41,20 @@ const Home = () => {
     });
   }
   
-  const getDataFromFirebase = () => {
+  const getHBidderFromFirebase = ()=>{
+    const dbRef = ref(database);
+      get(child(dbRef, 'hbid'))
+      .then((snapshot)=>{
+        if(snapshot.exists()){
+          const data = snapshot.val()
+          setHBid(data.bidder);
+        }
+        else{
+          console.log("No data available");
+        }
+      })
+  }
+  const getDataFromFirebase =  () => {
     const dbRef = ref(database);
 
     get(child(dbRef, `players/${player}`))
@@ -178,6 +191,7 @@ const Home = () => {
       setPlayer(id);
       console.log("player",player)
       getDataFromFirebase();
+      getHBidderFromFirebase();
       document.body.style.backgroundImage = `url(${imgurl})`;
       document.body.style.backgroundPosition = 'center'; // Center the background image horizontally and vertically
     document.body.style.backgroundSize = 'cover';
@@ -197,7 +211,12 @@ const Home = () => {
     
     const balanceListener = onValue(buyRef,(snapshot)=>{
       const data = snapshot.val();
-      setBalance(data.balance);
+      if (data !== null) {
+        setBalance(data.balance);
+      } else {
+        // Handle the case when data is null, maybe set a default balance or handle it in another way
+        console.log('No balance data available');
+      }
     })
     
   });
@@ -216,32 +235,49 @@ const Home = () => {
     const data = ss.val();
     setSession(Boolean(data));
   })
-  if(!session){
-      updateBalance(value);
-      
-  }
+
  },[session]);
 
-//  useEffect(()=>{
-//   if(sessio)
-//   {const hRef = ref(database,`hbid/bidder`);
-//   const hListener = onValue(hRef,(ss) => {
-//     const data = ss.val();
-//     setHBid(data);
+ useEffect(()=>{
+  if(session)
+  {const hRef = ref(database,`hbid/bidder`);
+  const hListener = onValue(hRef,(ss) => {
+    const data = ss.val();
+    setHBid(data);
     
-//   })}
+  })}
 
-//  },[hbid]);
+ },[session]);
 
-//  useEffect(() => {
-//   if(!session && hbid !== '' && hbid !=='Fake'){
-//       updateHBid('');
-//   }
-//  },[hbid])
-
+ useEffect(() => {
+  if (!session && hbid !== '' && hbid !== 'Fake') {
+    const deductAmount = async () => {
+      try {
+        const buyerRef = ref(database, `buyers/${hbid}`);
+        const snapshot = await get(buyerRef);
+        const buyerData = snapshot.val();
+        if (buyerData && buyerData.balance >= value) {
+          const updatedBalance = buyerData.balance - value;
+          await set(buyerRef, {
+            balance: updatedBalance
+          });
+          if(value > 0 && value){
+          alert(`Deducted ${value} from ${hbid}'s balance`);
+          }
+        } else {
+          alert(`Insufficient balance for ${hbid}`);
+        }
+      } catch (error) {
+        console.error('Error deducting amount:', error);
+      }
+    };
+ // Adjust the amount to deduct as per your requirements
+    deductAmount();
+  }
+}, [session, hbid]);
   
   return (
-    <div>
+    <div className='flex'>
       <Navbar balance={balance}/>
       {/* <div>
             Welcome
@@ -266,6 +302,7 @@ const Home = () => {
                 className="card-img-top img-fluid"
                 style={{width: '100%', height: '200px',objectFit:'cover'}}
                 alt="..."
+                referrerPolicy='no-referrer'
               />
               <div className="card-body">
 
@@ -274,9 +311,11 @@ const Home = () => {
                 <p className="card-text">{year} Year {branch} Branch</p>
                 <h5 className="card-title">Bet:- {value}</h5>
                 <h5 className="card-title">Manager:- {buyerName}</h5>
-                <h5 className="card-title">{pref}</h5>
+                <h5 className="card-title">H.Bid:- {hbid}</h5>
+                <h5 className="card-title">Pref:- {pref}</h5>
                 
-                {/* <div className="container text-center">
+                
+                <div className="container text-center">
                   <div className="row row-cols-1 gy-1">
                     <a onClick={()=>handleBet(100)}  className="btn btn-dark">
                       100
@@ -301,13 +340,12 @@ const Home = () => {
                       <button className="btn btn-dark" onClick={() => handleBet(Number(bet))}>Bid</button>
                     </div>
                   </div>
-                </div> */}
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>)}
-
 
 
     </div>
