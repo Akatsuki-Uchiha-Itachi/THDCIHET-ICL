@@ -65,7 +65,7 @@ const Home = () => {
           setYear(data.year);
           setBranch(data.branch);
           setImgurl(data.imgurl);
-          setValue(data.value);
+          // setValue(data.value);
           setPref(data.pref);
         } else {
           console.log('No data available');
@@ -193,6 +193,7 @@ const Home = () => {
       getDataFromFirebase();
       getHBidderFromFirebase();
       document.body.style.backgroundImage = `url(${imgurl})`;
+      document.body.style.height = '100vh';  
       document.body.style.backgroundPosition = 'center'; // Center the background image horizontally and vertically
     document.body.style.backgroundSize = 'cover';
     },[setPlayer])
@@ -309,13 +310,13 @@ const Home = () => {
                 <h5 className="card-title">{name}</h5>
 
                 <p className="card-text">{year} Year {branch} Branch</p>
-                <h5 className="card-title">Bet:- {value}</h5>
-                <h5 className="card-title">Manager:- {buyerName}</h5>
-                <h5 className="card-title">H.Bid:- {hbid}</h5>
-                <h5 className="card-title">Pref:- {pref}</h5>
+                {/* <h5 className="card-title">Bet:- {value}</h5> */}
+                {/* <h5 className="card-title">Manager:- {buyerName}</h5> */}
+                {/* <h5 className="card-title">H.Bid:- {hbid}</h5> */}
+                <h5 className="card-title">{pref}</h5>
                 
                 
-                <div className="container text-center">
+                {/* <div className="container text-center">
                   <div className="row row-cols-1 gy-1">
                     <a onClick={()=>handleBet(100)}  className="btn btn-dark">
                       100
@@ -340,7 +341,7 @@ const Home = () => {
                       <button className="btn btn-dark" onClick={() => handleBet(Number(bet))}>Bid</button>
                     </div>
                   </div>
-                </div>
+                </div> */}
               </div>
             </div>
           </div>

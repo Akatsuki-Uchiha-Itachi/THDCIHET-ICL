@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "thdcihetsports"
-  }
+    "default": "thdciheticl",
+    "icl": "thdciheticl"
+  },
+  "targets": {},
+  "etags": {}
 }
